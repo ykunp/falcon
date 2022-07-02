@@ -20,6 +20,13 @@ function ValidURL(text) {
     return valid.test(text);
 }
 
+function getTimestamp() {
+    const pad = (n, s = 2) => (`${new Array(s).fill(0)}${n}`).slice(-s);
+    const d = new Date();
+
+    return `${pad(d.getFullYear(), 4)}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
 chrome.omnibox.onInputChanged.addListener(omnibarHandler);
 chrome.omnibox.onInputEntered.addListener(acceptInput);
 chrome.runtime.onMessage.addListener(handleMessage);
@@ -129,6 +136,26 @@ function handleMessage(data, sender, sendResponse) {
         keyValue[time] = data;
         chrome.storage.local.set(keyValue, function() {
             console.log("Stored: " + data.title);
+        });
+
+
+        var upload_data = {};
+        upload_data["id"] = time
+        upload_data["title"] = data.title;
+        upload_data["url"] = data.url;
+        upload_data["time"] = getTimestamp()
+        fetch("https://<>/indexes/chrome/documents", {
+            method: "PUT",
+            cache: 'no-cache',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + '<>',
+            },
+            body: JSON.stringify([upload_data]),
+        }).then(function (response) {
+            // check the response object for result
+            // ...
+            console.log("Uploaded: " + data.title);
         });
 
         timeIndex.push(time.toString());
