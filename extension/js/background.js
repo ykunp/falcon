@@ -129,6 +129,12 @@ function assert(condition, message) {
 function handleMessage(data, sender, sendResponse) {
     // data is from message
     if (data.msg === 'pageContent' && shouldArchive(data)) {
+        var u = new URL(data.url)
+        if (u.pathname == '/') {
+            return;
+        }
+
+
         delete data.msg;
         data.text = processPageText(data.text);
         var time = data.time;
@@ -138,24 +144,27 @@ function handleMessage(data, sender, sendResponse) {
             console.log("Stored: " + data.title);
         });
 
+        var endpointDomain = window.preferences.esDomain
+        var endpointApikey = window.preferences.esApikey
 
-        var upload_data = {};
-        upload_data["id"] = time
-        upload_data["title"] = data.title;
-        upload_data["url"] = data.url;
-        upload_data["time"] = getTimestamp()
-        fetch("https://<>/indexes/chrome/documents", {
-            method: "PUT",
+        console.log(endpointDomain, endpointApikey)
+        var endpoint = `https://${endpointDomain}/chrome_history/_doc`;
+        var payload = {};
+        payload["@timestamp"] = time;
+        payload["url"] = data.url;
+        payload["title"] = data.title;
+        payload["host"] = u.hostname;
+
+        fetch(endpoint, {
+            method: "POST",
             cache: 'no-cache',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + '<>',
+                'Authorization': 'ApiKey ' + `${endpointApikey}`,
             },
-            body: JSON.stringify([upload_data]),
+            body: JSON.stringify(payload),
         }).then(function (response) {
-            // check the response object for result
-            // ...
-            console.log("Uploaded: " + data.title);
+            console.log("Uploaded es: " + data.title);
         });
 
         timeIndex.push(time.toString());

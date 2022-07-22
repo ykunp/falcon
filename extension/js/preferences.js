@@ -86,6 +86,19 @@
             yield allPages.splice(0, 20)
     }
 
+    chrome.storage.local.get('preferences', function (result) {
+        console.log(result)
+        var domain = result.preferences.esDomain
+        var apikey = result.preferences.esApikey
+
+        console.log('on init', domain, apikey)
+
+        var domainElem = document.getElementById("es_domain");
+        var apiKeyElem = document.getElementById("es_apikey");
+        domainElem.value = domain;
+        apiKeyElem.value = apikey;
+    })
+
     chrome.storage.local.get('blacklist', function(result) {
         var bl = result.blacklist
         if (Object.keys(bl).length > 0 && (bl['SITE'].length + bl['PAGE'].length + bl['REGEX'].length > 0)) {
@@ -103,6 +116,17 @@
     });
 
     function save(showAlert) {
+        var domain = document.getElementById("es_domain").value;
+        var apiKey = document.getElementById("es_apikey").value;
+        preferences = {
+            'esDomain': domain,
+            'esApikey': apiKey,
+        }
+        console.log(preferences)
+        chrome.runtime.sendMessage({
+            'msg': 'setPreferences',
+            'preferences': preferences
+        })
         var showAlert = (typeof showAlert !== 'undefined') ?  showAlert : true;
         if (showAlert) { notie.alert(4, "Saved Preferences.", 2); }
         var tab = document.getElementById("blacklist_tbl");
@@ -117,8 +141,6 @@
         for (var j = indices.length-1; j > -1; j--) {
             tab.deleteRow(indices[j]);
         }
-
-
 
         if (tab.rows.length == 1) {
             chrome.runtime.sendMessage({
