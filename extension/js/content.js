@@ -14,7 +14,7 @@ window.setTimeout((function(){
         "msg":'pageContent',
         "time":epochTime,
         "url":url,
-        "text":document.body.innerText, //relText,
+        // "text":document.body.innerText, //relText,
         "title":document.title,
     });
 }), 3000);
