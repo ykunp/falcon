@@ -130,7 +130,7 @@ function handleMessage(data, sender, sendResponse) {
     // data is from message
     if (data.msg === 'pageContent' && shouldArchive(data)) {
         var u = new URL(data.url)
-        if (u.pathname == '/' || u.pathname == '/home') {
+        if (u.pathname == '/' || u.pathname == '/home' || u.hostname.endsWith('.local')) {
             return;
         }
 
