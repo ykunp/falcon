@@ -147,6 +147,11 @@ function handleMessage(data, sender, sendResponse) {
         var endpointDomain = window.preferences.esDomain
         var endpointApikey = window.preferences.esApikey
 
+        if (endpointApikey === 'undefined' || endpointApikey == "") {
+            console.log('api key empty');
+            return;
+        }
+
         var endpoint = `https://${endpointDomain}/chrome_history/_doc`;
         var payload = {};
         payload["@timestamp"] = (new Date()).toISOString();
